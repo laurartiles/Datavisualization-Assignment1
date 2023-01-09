@@ -1,0 +1,14 @@
+name: EarthquakesViz
+title: EarthquakesViz
+username:
+account: jfompe
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7991859
+bundleId: 6710508
+url: https://jfompe.shinyapps.io/EarthquakesViz/
+when: 1673200256.48104
+lastSyncTime: 1673200256.48105
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|archive.zip
