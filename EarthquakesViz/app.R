@@ -16,7 +16,6 @@ library(forcats)
 library(sp)
 library(sf) #https://github.com/fraxen/tectonicplates/edit/master/GeoJSON/PB2002_plates.json
 library(maps)
-library(rworldmap)
 library(ggmap)
 source("helper.R")
 
@@ -76,13 +75,24 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
+          h3("How are earthquakes distributed around the world?"),
           plotOutput("mapRepresentation"),
+          h3("How have earthquakes developed over time in terms of frequency?"),
           plotOutput("tsFreqPlot"),
-          conditionalPanel(condition = 'input.seasonality && input.groupingUnit == "Month"', plotOutput('decompositionFrec')),
+          conditionalPanel(
+            condition = 'input.seasonality && input.groupingUnit == "Month"', 
+            h3("Can any seasonal component be found in the number of earthquakes through time?"),
+            plotOutput('decompositionFrec')),
+          h3("How have earthquakes developed over time in terms of magnitude?"),
           plotOutput("tsMagnitudePlot"),
-          conditionalPanel(condition = 'input.seasonality && input.groupingUnit == "Month"', plotOutput('decompositionAvg')),
+          conditionalPanel(
+            condition = 'input.seasonality && input.groupingUnit == "Month"', 
+            h3("Can any seasonal component be found in the magnitude of earthquakes through time?"),
+            plotOutput('decompositionAvg')),
+          h3("Do different continents suffer earthquakes with different magnitudes?"),
           plotOutput("continentsMagnitudeDistribution"),
           #plotOutput("distributionPlot"),
+          h3("How are the different continents affected by earthquakes in relation to the total number of them?"),
           plotOutput("continentsPiePlot")
         )
     )
