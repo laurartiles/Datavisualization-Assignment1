@@ -250,7 +250,7 @@ server <- function(input, output) {
     
     output$mapRepresentation <- renderPlot({
       ggmap(map) +
-        geom_point(data = get.used.earthquakes(), aes(x=Longitude, y=Latitude, fill="red", alpha=0.8), size=2, shape=21) +
+        geom_point(data = get.used.earthquakes(), aes(x=longitude, y=latitude, fill="red", alpha=0.8), size=2, shape=21) +
         guides(fill=FALSE, alpha=FALSE)  +
         geom_sf(data = plates, colour = "red", fill = NA, inherit.aes = FALSE)
     })
