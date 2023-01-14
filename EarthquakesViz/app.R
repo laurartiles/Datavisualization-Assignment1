@@ -311,9 +311,7 @@ server <- function(input, output) {
                          radius = 5,
                          color = ~palletDepth(DepthType),
                          stroke = FALSE, fillOpacity = 0.6) %>%
-        leaflet::addLegend("bottomleft", colors = c("black", "green",  "blue", "purple", "red", "yellow"),
-                           labels=c("3.3 to 3.9", ">3.9 to 4.9", ">4.9 to 5.9", ">5.9 to 6.9", ">6.9 to 7.9", ">7.9 to 9.1"),
-                           title = "Magnitude")
+        leaflet::addLegend("bottomleft", pal = palletDepth, values=~DepthType, title = "Depth")
     })
     
     
