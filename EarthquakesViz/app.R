@@ -73,69 +73,104 @@ palletDepth <- colorFactor(c("yellow",  "orange", "red"),
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
-    # Application title
-    titlePanel("Earthquakes from 1965 to 2016"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            style = "position:fixed",
-            dateRangeInput("dateRange", 
-                           "Range of dates for the graph",
-                           start = min_date,
-                           end = max_date,
-                           min = min_date,
-                           max = max_date,
-                           startview = "decade"
-                           ),
-            sliderInput("magnitudeRange",
-                        "Earthquake magnitude range",
-                        min = min_magnitude,
-                        max = max_magnitude,
-                        value = c(min_magnitude,max_magnitude),
-                        step = 0.2),
-            radioButtons("groupingUnit",
-                         "Group data by month or year",
-                         c("Month", "Year")),
-            checkboxGroupInput("continents",
-                               "Selected continents",
-                               choices = CONTINENTS,
-                               selected = CONTINENTS),
-            checkboxInput("seasonality",
-                          "Visualize seasonality (Advanced)",
-                          value = FALSE)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-          h3("How are earthquakes distributed around the world?"),
-          plotOutput("mapRepresentation"),
-          
-          h3("How have earthquakes developed over time in terms of frequency?"),
-          plotOutput("tsFreqPlot"),
-          
-          conditionalPanel(
-            condition = 'input.seasonality && input.groupingUnit == "Month"', 
-            h3("Can any seasonal component be found in the number of earthquakes through time?"),
-            plotOutput('decompositionFrec')),
-          
-          h3("How have earthquakes developed over time in terms of magnitude?"),
-          plotOutput("tsMagnitudePlot"),
-          
-          conditionalPanel(
-            condition = 'input.seasonality && input.groupingUnit == "Month"', 
-            h3("Can any seasonal component be found in the magnitude of earthquakes through time?"),
-            plotOutput('decompositionAvg')),
-          
-          h3("Do different continents suffer earthquakes with different magnitudes?"),
-          plotOutput("continentsMagnitudeDistribution"),
-          #plotOutput("distributionPlot"),
-          
-          h3("How are the different continents affected by earthquakes in relation to the total number of them?"),
-          plotOutput("continentsPiePlot")
-        )
-    )
+  
+  sidebarLayout(
+    sidebarPanel(
+    style = "position:fixed",
+    dateRangeInput("dateRange",
+                   "Range of dates for the graph",
+                   start = min_date,
+                   end = max_date,
+                   min = min_date,
+                   max = max_date,
+                   startview = "decade"
+    ),
+    sliderInput("magnitudeRange",
+                "Earthquake magnitude range",
+                min = min_magnitude,
+                max = max_magnitude,
+                value = c(min_magnitude,max_magnitude),
+                step = 0.2),
+    radioButtons("groupingUnit",
+                 "Group data by month or year",
+                 c("Month", "Year")),
+    checkboxGroupInput("continents",
+                       "Selected continents",
+                       choices = CONTINENTS,
+                       selected = CONTINENTS),
+    checkboxInput("seasonality",
+                  "Visualize seasonality",
+                  value = FALSE)
+  ),
+  mainPanel(
+    navbarPage("Earthquakes from 1965 to 2016", position = c("fixed-top"),
+               tags$style(type="text/css", "body {padding-top: 70px;}", 
+                          '.navbar { background-color: #2010A0;
+                           font-family: Arial;
+                           font-size: 18px;
+                           color: #ABCB0C; }',
+                          
+                          '.navbar-default .navbar-brand {
+                             color: #ABCB0C;
+                             font-size: 25px;
+                           }'
+               ),
+               tabPanel("Evolution of earthquakes",
+                          mainPanel(
+                            width = 12,
+                            h1("Evolution of Earthquakes over time"),
+                            p("p creates a paragraph of text."),
+                            plotOutput("tsFreqPlot"),
+                            conditionalPanel(condition = 'input.seasonality && input.groupingUnit == "Month"', plotOutput('decompositionFrec')),
+                            h1("Evolution of Average Magnitude over time"),
+                            plotOutput("tsMagnitudePlot"),
+                            conditionalPanel(condition = 'input.seasonality && input.groupingUnit == "Month"', plotOutput('decompositionAvg')),
+                            # plotOutput("MagnitudeYearPlot"),
+                            #plotOutput("mapRepresentation"),
+                            h1("Analysis of Frequency"),
+                            h2("Histograms"),
+                            plotOutput("QuakesYear"),
+                            plotOutput("QuakesYear2"),
+                            h2("Top 10"),
+                            plotOutput("Top10QuakeFreq")
+                            
+                          )
+               ),
+               tabPanel("Location of earthquakes",
+                          mainPanel(
+                            width = 12,
+                            h1("Map of Earthquakes by magnitude"),
+                            leafletOutput("quakemap"),
+                            h1("Map of Earthquakes grouped by location"),
+                            leafletOutput("quakemap2"),
+                            h1("Treemap - Earthquakes per Country"),
+                            highchartOutput("ChartCountry")
+                          )
+               ),
+               tabPanel("Magnitude Analysis",
+                          mainPanel(
+                            width = 12,
+                            plotOutput("continentsMagnitudeDistribution"),
+                            plotOutput("continentsPiePlot"),
+                            plotOutput("QuakesMag"),
+                            plotOutput("MagnitudeDepth"),
+                          )
+                ),
+               tabPanel("Depth Analysis",
+                        mainPanel(
+                          width = 12,
+                          plotOutput("QuakesDepth"),
+                          plotOutput("QuakesDepth0"),
+                          leafletOutput("quakemap_Depth"),
+                          plotOutput("QuakesDepth2")
+                        )
+               )
+              )
+          ),
+  position = "left",
+  fluid = TRUE
+  )
+  
 )
 
 # Define server logic required to draw a histogram
