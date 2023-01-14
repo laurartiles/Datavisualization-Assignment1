@@ -137,8 +137,6 @@ ui <- fluidPage(
                             width = 12,
                             h1("Map of Earthquakes by magnitude"),
                             leafletOutput("quakemap"),
-                            h1("Map of Earthquakes grouped by location"),
-                            leafletOutput("quakemapGroups"),
                             h1("Treemap - Earthquakes per Country"),
                             highchartOutput("ChartCountry")
                           )
@@ -190,9 +188,7 @@ server <- function(input, output) {
     
     # Frequency (per date)
     n.per.date <- reactive({
-      n.per.date <- get.used.earthquakes() %>% count(date = format(Date, get.date.format())) %>% na.omit
-      #n.per.date$date <- as.Date(n.per.date$date, "%Y")
-      n.per.date
+      get.used.earthquakes() %>% count(date = format(Date, get.date.format())) %>% na.omit
     })
     top.frequencies <- reactive({
       n.per.date() %>% arrange(desc(n)) %>% head(10)
@@ -264,19 +260,8 @@ server <- function(input, output) {
       plot(ts.dec)
     })
     
-    output$distributionPlot <- renderPlot({
-      hist(get.used.earthquakes()$Magnitude, xlab = "Magnitude", main = "Distribution of earthquake magnitudes")  
-    })
-    
     output$continentsMagnitudeDistribution <- renderPlot({
       ggplot(n.per.continent.per.magnitude(), aes(fill=Continent, y=n, x=DiscreteMagnitude)) + geom_bar(position = "stack", stat = "identity")
-    })
-    
-    output$mapRepresentation <- renderPlot({
-      ggmap(map) +
-        geom_point(data = get.used.earthquakes(), aes(x=longitude, y=latitude, fill="red", alpha=0.8), size=2, shape=21) +
-        guides(fill=FALSE, alpha=FALSE)  +
-        geom_sf(data = plates, colour = "red", fill = NA, inherit.aes = FALSE)
     })
     
     mapPointPopup <- reactive({
