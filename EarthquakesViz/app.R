@@ -54,6 +54,21 @@ CONTINENTS = factor(c("Africa", "Antartica", "Asia", "Australia", "Europe", "Nor
 
 earthquakes$DiscreteMagnitude <- floor(earthquakes$Magnitude)
 
+earthquakes$Size <- cut(earthquakes$Magnitude,
+                        c(5.4, 5.9, 6.9, 7.9, 9.1),
+                        labels=c("5.5 to 5.9", "6.0 to 6.9", "7.0 to 7.9", "8.0 to 9.1"))
+
+# colour pallet Magnitude
+pallet <- colorFactor(c("yellow",  "purple", "green", "red"),
+                      domain = c("5.5 to 5.9", "6.0 to 6.9", "7.0 to 7.9", "8.0 to 9.1"))
+
+
+earthquakes$DepthType <- cut(earthquakes$Depth,
+                        c(-1.1, 99, 200, 700),
+                        labels=c("<50km", "<100km", ">100km"))
+
+palletDepth <- colorFactor(c("yellow",  "orange", "red"),
+                          domain = c("<50km", "<100km", ">100km"))
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
