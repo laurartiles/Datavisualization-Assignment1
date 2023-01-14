@@ -51,6 +51,7 @@ plates <- st_transform(st_read("plates.json"), 3857)
 
 earthquakes$Continent <- as.factor(coords2continent(coords.df))
 CONTINENTS = factor(c("Africa", "Antartica", "Asia", "Australia", "Europe", "North America", "South America", "Ocean"))
+earthquakes$Country <- as.factor(coords2continent(coords.df, 'country'))
 
 earthquakes$DiscreteMagnitude <- floor(earthquakes$Magnitude)
 
@@ -195,7 +196,7 @@ server <- function(input, output) {
       get.used.earthquakes() %>% filter(Type=="Earthquake") %>% group_by(Depth) %>% summarise(Observations=n())
     })
     sum_country <- reactive({
-      earthquakes_country %>% group_by(Country) %>% summarise(Observations=n())
+      get.used.earthquakes() %>% group_by(Country) %>% summarise(Observations=n())
     })
     Quake_Freq <- reactive({
       get.used.earthquakes() %>% group_by(Year) %>% summarise(n=n()) %>% arrange(desc(n)) %>% head(10)
