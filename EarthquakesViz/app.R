@@ -138,7 +138,7 @@ ui <- fluidPage(
                             h1("Map of Earthquakes by magnitude"),
                             leafletOutput("quakemap"),
                             h1("Map of Earthquakes grouped by location"),
-                            leafletOutput("quakemap2"),
+                            leafletOutput("quakemapGroups"),
                             h1("Treemap - Earthquakes per Country"),
                             highchartOutput("ChartCountry")
                           )
@@ -279,71 +279,52 @@ server <- function(input, output) {
         geom_sf(data = plates, colour = "red", fill = NA, inherit.aes = FALSE)
     })
     
+    mapPointPopup <- reactive({
+      paste("<b>Mag:</b>", as.character(get.used.earthquakes()$Magnitude), "<br>",
+            "<b>Depth:</b>", as.character(get.used.earthquakes()$Depth), "km<br>",
+            "<b>Time:</b>", as.character(get.used.earthquakes()$Date),"<br>",
+            "<b>Lat:</b>", as.character(get.used.earthquakes()$Latitud),"<br>",
+            "<b>Long:</b>", as.character(get.used.earthquakes()$Longitud),"<br>",
+            "<b>ID:</b>", get.used.earthquakes()$ID,"<br>")
+    })
+    
     # Map with earthquakes by depth
-    qm <- function() {
-      # earthquake.get <- get.used.earthquakes()
-      pu <- paste("<b>Mag:</b>", as.character(get.used.earthquakes()$Magnitude), "<br>",
-                  "<b>Depth:</b>", as.character(get.used.earthquakes()$Depth), "km<br>",
-                  "<b>Time:</b>", as.character(get.used.earthquakes()$Date),"<br>",
-                  "<b>Lat:</b>", as.character(get.used.earthquakes()$Latitud),"<br>",
-                  "<b>Long:</b>", as.character(get.used.earthquakes()$Longitud),"<br>",
-                  "<b>ID:</b>", get.used.earthquakes()$ID,"<br>"
-      )
-      tempmap <- leaflet(get.used.earthquakes()) %>% addTiles() %>%
+    output$quakemap <- renderLeaflet({
+      leaflet(get.used.earthquakes()) %>% addTiles() %>%
+        addPolygons(data = plates) %>%
         setView(0.000, 0.000, zoom = 2) %>%
-        addCircleMarkers(popup = pu,
+        addCircleMarkers(popup = mapPointPopup(),
                          radius = ~ifelse(Magnitude < 5.9, 4, 6),
                          color = ~pallet(Size),
-                         stroke = FALSE, fillOpacity = 0.6) #%>%
-      # addLegend("bottomleft", colors = c("black", "green",  "blue", "purple", "red", "yellow"),
-      # labels=c("3.3 to 3.9", ">3.9 to 4.9", ">4.9 to 5.9", ">5.9 to 6.9", ">6.9 to 7.9", ">7.9 to 9.1"),
-      # title = "Magnitude")
-    }
-    output$quakemap <- renderLeaflet(qm())
+                         stroke = FALSE, fillOpacity = 0.6) %>%
+        leaflet::addLegend("bottomleft", colors = c("green",  "blue", "yellow", "red"),
+                           labels=c(">4.9 to 5.9", ">5.9 to 6.9", ">6.9 to 7.9", ">7.9 to 9.1"),
+                           title = "Magnitude")
+    })
     
     # Map with grouped earthquakes in numbers
-    output$quakemap2 <- renderLeaflet(
+    output$quakemapGroups <- renderLeaflet(
       leaflet(get.used.earthquakes()) %>%
       addTiles() %>%
+      addPolygons(data = plates) %>%
       setView(0.000, 0.000, zoom = 2) %>%
       addMarkers(lat=get.used.earthquakes()$Latitude, lng=get.used.earthquakes()$Longitude, clusterOptions = markerClusterOptions(),
-                 popup= paste("<b>Mag:</b>", as.character(get.used.earthquakes()$Magnitude), "<br>",
-                              "<b>Depth:</b>", as.character(get.used.earthquakes()$Depth), "km<br>",
-                              "<b>Time:</b>", as.character(get.used.earthquakes()$Date),"<br>",
-                              "<b>Lat:</b>", as.character(get.used.earthquakes()$Latitud),"<br>",
-                              "<b>Long:</b>", as.character(get.used.earthquakes()$Longitud),"<br>",
-                              "<b>ID:</b>", get.used.earthquakes()$ID,"<br>"
-    )))
+                 popup = mapPointPopup()
+    ))
 
-    # output$map <- renderLeaflet({
-    #   leaflet(get.used.earthquakes())%>%
-    #     addTiles() %>%
-    #     setView(0.000, 0.000, zoom = 2) %>%
-    #     addCircles(radius = 5, color = "red", fillOpacity = 0.7, popup=paste("Mag=", earthquakes$Magnitude))
-    # })
-
-    
     # Map with earthquakes by depth
-    qd <- function() {
-      # earthquake.get <- get.used.earthquakes()
-      pu2 <- paste("<b>Mag:</b>", as.character(get.used.earthquakes()$Magnitude), "<br>",
-                  "<b>Depth:</b>", as.character(get.used.earthquakes()$Depth), "km<br>",
-                  "<b>Time:</b>", as.character(get.used.earthquakes()$Date),"<br>",
-                  "<b>Lat:</b>", as.character(get.used.earthquakes()$Latitud),"<br>",
-                  "<b>Long:</b>", as.character(get.used.earthquakes()$Longitud),"<br>",
-                  "<b>ID:</b>", get.used.earthquakes()$ID,"<br>"
-      )
-      tempmap <- leaflet(get.used.earthquakes()) %>% addTiles() %>%
+    output$quakemap_Depth <- renderLeaflet({
+      leaflet(get.used.earthquakes()) %>% addTiles() %>%
+        addPolygons(data = plates) %>%
         setView(0.000, 0.000, zoom = 2) %>%
-        addCircleMarkers(popup = pu2,
+        addCircleMarkers(popup = mapPointPopup(),
                          radius = 5,
                          color = ~palletDepth(DepthType),
-                         stroke = FALSE, fillOpacity = 0.6) #%>%
-      # addLegend("bottomleft", colors = c("black", "green",  "blue", "purple", "red", "yellow"),
-      # labels=c("3.3 to 3.9", ">3.9 to 4.9", ">4.9 to 5.9", ">5.9 to 6.9", ">6.9 to 7.9", ">7.9 to 9.1"),
-      # title = "Magnitude")
-    }
-    output$quakemap_Depth <- renderLeaflet(qd())
+                         stroke = FALSE, fillOpacity = 0.6) %>%
+        leaflet::addLegend("bottomleft", colors = c("black", "green",  "blue", "purple", "red", "yellow"),
+                           labels=c("3.3 to 3.9", ">3.9 to 4.9", ">4.9 to 5.9", ">5.9 to 6.9", ">6.9 to 7.9", ">7.9 to 9.1"),
+                           title = "Magnitude")
+    })
     
     
     #TreeMap Earthquakes Country
