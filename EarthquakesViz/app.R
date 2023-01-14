@@ -30,10 +30,18 @@ library(treemap)
 
 earthquakes<-read.csv('database.csv')
 earthquakes$Date <- as.Date(earthquakes$Date, "%m/%d/%Y")
+earthquakes$Year <- format(earthquakes$Date, "%Y")
+earthquakes$Month <- format(earthquakes$Date, "%m")
+earthquakes$Day <- format(earthquakes$Date, "%d")
+
 min_date <- min(earthquakes$Date, na.rm = TRUE)
 max_date <- max(earthquakes$Date, na.rm = TRUE)
 min_magnitude <-  min(earthquakes$Magnitude, na.rm = TRUE)
 max_magnitude <- max(earthquakes$Magnitude, na.rm = TRUE)
+min_long <-  min(earthquakes$Longitude, na.rm = TRUE)
+max_long <- max(earthquakes$Longitude, na.rm = TRUE)
+min_lat <-  min(earthquakes$Latitude, na.rm = TRUE)
+max_lat <- max(earthquakes$Latitude, na.rm = TRUE)
 
 coords.df <- data.frame(Lng=earthquakes$Longitude, Lat=earthquakes$Latitude)
 map.bbox <- c(bottom=-85, top=85, right=185, left=-185)
