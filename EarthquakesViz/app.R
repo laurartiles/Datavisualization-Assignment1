@@ -195,6 +195,9 @@ server <- function(input, output) {
       #n.per.date$date <- as.Date(n.per.date$date, "%Y")
       n.per.date
     })
+    top.frequencies <- reactive({
+      n.per.date() %>% arrange(desc(n)) %>% head(10)
+    })
     # Magnitude (per date)
     magn.per.date <- reactive({
       get.used.earthquakes() %>% group_by(date = format(Date, get.date.format())) %>% summarise(min = min(Magnitude), mean = mean(Magnitude), max = max(Magnitude)) %>% na.omit
@@ -226,9 +229,6 @@ server <- function(input, output) {
     })
     sum_country <- reactive({
       get.used.earthquakes() %>% group_by(Country) %>% summarise(Observations=n())
-    })
-    Quake_Freq <- reactive({
-      get.used.earthquakes() %>% group_by(Year) %>% summarise(n=n()) %>% arrange(desc(n)) %>% head(10)
     })
     
     # PLOTS
@@ -397,11 +397,13 @@ server <- function(input, output) {
     })
     
 
-    #Top 10 Years with Highest Earthquake Frequency in selected Range of Dates
+    #Top 10 Dates with Highest Earthquake Frequency in selected Range of Dates
     output$Top10QuakeFreq <- renderPlot({
-      ggplot(Quake_Freq(), aes(x =reorder(Year,n), y =  n )) + geom_bar(stat='identity',colour="white", fill = c("#66a3da")) +
-        labs(x = 'Year', y = 'Count', title = 'Top 10 Years with Highest Earthquake Frequency in selected Range of Dates') +
-        coord_flip() + theme_bw()
+      ggplot(top.frequencies(), aes(x=reorder(date,n), y=n)) + 
+        geom_bar(stat='identity',colour="white", fill = c("#66a3da")) +
+        labs(x = 'Date', y = 'Count', title = paste('Top 10 ', input$groupingUnit, 's with Highest Earthquake Frequency in selected Range of Dates', sep = '')) +
+        coord_flip() + 
+        theme_bw()
     })
 
     
