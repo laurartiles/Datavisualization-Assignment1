@@ -100,6 +100,9 @@ ui <- fluidPage(
                        selected = CONTINENTS),
     checkboxInput("seasonality",
                   "Visualize seasonality",
+                  value = FALSE),
+    checkboxInput("groupPoints",
+                  "Group points in location maps",
                   value = FALSE)
   ),
   mainPanel(
@@ -287,28 +290,18 @@ server <- function(input, output) {
     
     # Map with earthquakes by depth
     output$quakemap <- renderLeaflet({
-      leaflet(get.used.earthquakes()) %>% addTiles() %>%
+      leaflet(get.used.earthquakes()) %>% 
+        addTiles() %>%
         addPolygons(data = plates) %>%
         setView(0.000, 0.000, zoom = 2) %>%
         addCircleMarkers(popup = mapPointPopup(),
                          radius = ~ifelse(Magnitude < 5.9, 4, 6),
                          color = ~pallet(Size),
-                         stroke = FALSE, fillOpacity = 0.6) %>%
-        leaflet::addLegend("bottomleft", colors = c("green",  "blue", "yellow", "red"),
-                           labels=c(">4.9 to 5.9", ">5.9 to 6.9", ">6.9 to 7.9", ">7.9 to 9.1"),
-                           title = "Magnitude")
+                         stroke = FALSE, fillOpacity = 0.6,
+                         clusterOptions = {if (input$groupPoints) markerClusterOptions()}) %>%
+        leaflet::addLegend("bottomleft", pal = pallet, values=~Size, title = "Magnitude")
     })
     
-    # Map with grouped earthquakes in numbers
-    output$quakemapGroups <- renderLeaflet(
-      leaflet(get.used.earthquakes()) %>%
-      addTiles() %>%
-      addPolygons(data = plates) %>%
-      setView(0.000, 0.000, zoom = 2) %>%
-      addMarkers(lat=get.used.earthquakes()$Latitude, lng=get.used.earthquakes()$Longitude, clusterOptions = markerClusterOptions(),
-                 popup = mapPointPopup()
-    ))
-
     # Map with earthquakes by depth
     output$quakemap_Depth <- renderLeaflet({
       leaflet(get.used.earthquakes()) %>% addTiles() %>%
