@@ -179,7 +179,27 @@ server <- function(input, output) {
     n.per.continent.per.magnitude <- reactive({
       get.used.earthquakes() %>% count(Continent, DiscreteMagnitude)
     })
+    n.per.depth <- reactive({
+      get.used.earthquakes() %>% count(Depth)
+    })
     
+    per_year <- reactive({
+      get.used.earthquakes() %>% filter(Type=="Earthquake") %>% 
+        group_by(Year) %>% summarise(Observations=n())
+    })
+    per_magnitude <- reactive({
+      get.used.earthquakes() %>% filter(Type=="Earthquake") %>% 
+        group_by(Magnitude) %>% summarise(Observations=n())
+    })
+    per_Depth <- reactive({
+      get.used.earthquakes() %>% filter(Type=="Earthquake") %>% group_by(Depth) %>% summarise(Observations=n())
+    })
+    sum_country <- reactive({
+      earthquakes_country %>% group_by(Country) %>% summarise(Observations=n())
+    })
+    Quake_Freq <- reactive({
+      get.used.earthquakes() %>% group_by(Year) %>% summarise(n=n()) %>% arrange(desc(n)) %>% head(10)
+    })
     
     # PLOTS
     output$tsFreqPlot <- renderPlot({
