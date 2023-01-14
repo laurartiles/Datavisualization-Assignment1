@@ -160,7 +160,6 @@ ui <- fluidPage(
                         mainPanel(
                           width = 12,
                           plotOutput("QuakesDepth"),
-                          plotOutput("QuakesDepth0"),
                           leafletOutput("quakemap_Depth"),
                           plotOutput("QuakesDepth2")
                         )
@@ -405,18 +404,6 @@ server <- function(input, output) {
 
       })
     
-    # #Depth Analysis!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # output$QuakesDepth0 <- renderPlot({
-    # 
-    # #   ggplot(n.per.depth(), aes(x=Depth,y=n))+geom_bar(stat = "identity",fill="green")+
-    # #     labs(y="Observations", x="Depth", title="Depth Analysis",
-    # #          caption="Source: Significant Earthquakes, 1965-2016")+theme_bw()
-    # 
-    # ggplot(per_Depth(), aes(x =Depth, y=Observations,))+ geom_bar(stat = "identity",fill="red")+
-    #   labs(y="Observations", x="Depth", title="Depth Analysis",
-    #        caption="Source: Significant Earthquakes, 1965-2016")
-    # 
-    # })
     
     #Depth Analysis 
     output$QuakesDepth <- renderPlot({
