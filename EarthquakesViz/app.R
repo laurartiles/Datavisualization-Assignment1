@@ -147,7 +147,6 @@ ui <- fluidPage(
                           mainPanel(
                             width = 12,
                             plotOutput("continentsMagnitudeDistribution"),
-                            plotOutput("continentsPiePlot"),
                             plotOutput("QuakesMag"),
                             plotOutput("MagnitudeDepth"),
                           )
@@ -278,10 +277,6 @@ server <- function(input, output) {
     #   ylab('Magnitude')+
     #   theme(plot.title = element_text(hjust = 0.5))
     # })
-    
-    output$continentsPiePlot <- renderPlot({
-      pie(n.per.continent()$n, labels = n.per.continent()$Continent)
-    })
     
     output$continentsMagnitudeDistribution <- renderPlot({
       ggplot(n.per.continent.per.magnitude(), aes(fill=Continent, y=n, x=DiscreteMagnitude)) + geom_bar(position = "stack", stat = "identity")
