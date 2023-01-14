@@ -47,7 +47,7 @@ coords.df <- data.frame(Lng=earthquakes$Longitude, Lat=earthquakes$Latitude)
 map.bbox <- c(bottom=-85, top=85, right=185, left=-185)
 map <- get_stamenmap(bbox = map.bbox, zoom=3, maptype='watercolor')
 #https://github.com/fraxen/tectonicplates/edit/master/GeoJSON/PB2002_plates.json
-plates <- st_transform(st_read("plates.json"), 3857)
+plates <- fortify(st_read("plates.json"))
 
 earthquakes$Continent <- as.factor(coords2continent(coords.df))
 CONTINENTS = factor(c("Africa", "Antartica", "Asia", "Australia", "Europe", "North America", "South America", "Ocean"))
