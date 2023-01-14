@@ -71,7 +71,7 @@ ui <- fluidPage(
                                choices = CONTINENTS,
                                selected = CONTINENTS),
             checkboxInput("seasonality",
-                          "Visualize seasonality",
+                          "Visualize seasonality (Advanced)",
                           value = FALSE)
         ),
 
@@ -128,20 +128,23 @@ server <- function(input, output) {
     ts.start <-  reactive({ ifelse(input$groupingUnit == "Month", c(start.year(), start.month()), start.year()) })
     ts.end <-  reactive({ ifelse(input$groupingUnit == "Month", c(end.year(), end.month()), end.year()) })
     
+    # Frequency (per date)
     n.per.date <- reactive({
       n.per.date <- get.used.earthquakes() %>% count(date = format(Date, get.date.format())) %>% na.omit
       #n.per.date$date <- as.Date(n.per.date$date, "%Y")
       n.per.date
     })
-    avg.per.date <- reactive({
-      avg.per.date <- get.used.earthquakes() %>% group_by(date = format(Date, get.date.format())) %>% summarise(AvgMagnitude = mean(Magnitude)) %>% na.omit
-      #avg.per.date$date <- as.Date(avg.per.date$date, "%Y")
-      avg.per.date
+    # Magnitude (per date)
+    magn.per.date <- reactive({
+      get.used.earthquakes() %>% group_by(date = format(Date, get.date.format())) %>% summarise(min = min(Magnitude), mean = mean(Magnitude), max = max(Magnitude)) %>% na.omit
     })
     
+    
+    # Frequency (per continent)
     n.per.continent <- reactive({
       get.used.earthquakes() %>% count(Continent)
     })
+    # Frequency (per continent and magnitude)
     n.per.continent.per.magnitude <- reactive({
       get.used.earthquakes() %>% count(Continent, DiscreteMagnitude)
     })
@@ -162,14 +165,21 @@ server <- function(input, output) {
     })
     
     output$tsMagnitudePlot <- renderPlot({
-      x <- avg.per.date()
-      ts.earthquakes <- ts(x$AvgMagnitude, start = ts.start(), end = ts.end(), frequency = get.used.frec())
-      plot.ts(ts.earthquakes, main = paste("Average magnitude of earthquakes per ", input$groupingUnit))
+      ts.min <- ts(magn.per.date()$min, start = ts.start(), end = ts.end(), frequency = get.used.frec())
+      ts.mean <- ts(magn.per.date()$mean, start = ts.start(), end = ts.end(), frequency = get.used.frec())
+      ts.max <- ts(magn.per.date()$max, start = ts.start(), end = ts.end(), frequency = get.used.frec())
+      ts.plot(ts.min, ts.mean, ts.max, main = paste("Min, mean and max magnitude of earthquakes per ", input$groupingUnit))
+      
+      #df <- magn.per.date()
+      #ggplot(df, aes(1:nrow(df), mean)) + 
+      #  geom_line() +
+      #  geom_ribbon(aes(1:nrow(df), ymax=max, ymin=min), alpha=0.1) +
+      #  theme_bw() +
+      #  labs(x = "Date", y = "Min, Mean and Max magnitude")
     })
     
     output$decompositionAvg <- renderPlot({
-      x <- avg.per.date()
-      ts.earthquakes <- ts(x$AvgMagnitude, start = ts.start(), end = ts.end(), frequency = get.used.frec())
+      ts.earthquakes <- ts(magn.per.date()$mean, start = ts.start(), end = ts.end(), frequency = get.used.frec())
       ts.dec <- decompose(ts.earthquakes)
       plot(ts.dec)
     })
