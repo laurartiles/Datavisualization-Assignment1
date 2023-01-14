@@ -60,7 +60,7 @@ earthquakes$Size <- cut(earthquakes$Magnitude,
                         labels=c("5.5 to 5.9", "6.0 to 6.9", "7.0 to 7.9", "8.0 to 9.1"))
 
 # colour pallet Magnitude
-pallet <- colorFactor(c("yellow",  "purple", "green", "red"),
+pallet <- colorFactor(c("green", "yellow", "orange", "red"),
                       domain = c("5.5 to 5.9", "6.0 to 6.9", "7.0 to 7.9", "8.0 to 9.1"))
 
 
