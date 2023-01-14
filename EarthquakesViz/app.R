@@ -160,8 +160,7 @@ ui <- fluidPage(
                         mainPanel(
                           width = 12,
                           plotOutput("QuakesDepth"),
-                          leafletOutput("quakemap_Depth"),
-                          plotOutput("QuakesDepth2")
+                          leafletOutput("quakemap_Depth")
                         )
                )
               )
@@ -411,11 +410,6 @@ server <- function(input, output) {
         stat_density(fill="lightblue")+
         labs(title="Earthquakes",subtitle="Depth")+
         scale_x_log10(breaks = seq.int(from = 0,to = 700,by = 50))
-    })
-    
-    output$QuakesDepth2 <- renderPlot({
-      ggplot(per_Depth(), aes(x =Depth, y =Observations, colour = "red"))  + 
-        geom_point()  + geom_line()
     })
     
 
