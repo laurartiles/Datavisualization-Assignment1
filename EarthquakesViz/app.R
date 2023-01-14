@@ -7,17 +7,18 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
-library(tidyverse)
-library(ggplot2)
-library(dplyr)
-library(plotly)
-library(forcats)
-library(sp)
-library(sf) #https://github.com/fraxen/tectonicplates/edit/master/GeoJSON/PB2002_plates.json
-library(maps)
-library(ggmap)
-source("helper.R")
+library(shiny) # Build interactive web apps
+library(tidyverse) # Collection of R packages for data science
+library(ggplot2) # Data visualization package
+library(dplyr) # Tools for easier df manipulation (e.g. pipes)
+library(plotly) # Interactive plots
+library(forcats) # Categorical values handling
+library(sp) # Spatial data
+library(sf) # Spatial data
+library(rworldmap) # Mapping global data
+library(maps) # Display of maps
+library(ggmap) # Visualize spatial data from Stamen maps
+source("helper.R") # Map coordinates to continents
 
 earthquakes<-read.csv('database.csv')
 earthquakes$Date <- as.Date(earthquakes$Date, "%m/%d/%Y")
@@ -29,6 +30,7 @@ max_magnitude <- max(earthquakes$Magnitude, na.rm = TRUE)
 coords.df <- data.frame(Lng=earthquakes$Longitude, Lat=earthquakes$Latitude)
 map.bbox <- c(bottom=-85, top=85, right=185, left=-185)
 map <- get_stamenmap(bbox = map.bbox, zoom=3, maptype='watercolor')
+#https://github.com/fraxen/tectonicplates/edit/master/GeoJSON/PB2002_plates.json
 plates <- st_transform(st_read("plates.json"), 3857)
 
 earthquakes$Continent <- as.factor(coords2continent(coords.df))
