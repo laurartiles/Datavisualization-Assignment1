@@ -1,4 +1,4 @@
-coords2continent = function(points)
+coords2continent = function(points, regionName="continent")
 {  
   countriesSP <- getMap(resolution='low')
   #countriesSP <- getMap(resolution='high') #you could use high res map from rworldxtra if you were concerned about detail
@@ -18,5 +18,7 @@ coords2continent = function(points)
   #indices$ADMIN  
   #indices$ISO3 # returns the ISO3 code 
   #indices$continent   # returns the continent (6 continent model)
-  fct_explicit_na(indices$REGION, "Ocean")   # returns the continent (7 continent model + Ocean)
+  if (regionName == 'country') return(fct_explicit_na(indices$ADMIN, "Ocean"))
+  # continent
+  else return(fct_explicit_na(indices$REGION, "Ocean"))   # returns the continent (7 continent model + Ocean)
 }
