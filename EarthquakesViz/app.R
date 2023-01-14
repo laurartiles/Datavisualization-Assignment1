@@ -268,22 +268,9 @@ server <- function(input, output) {
       hist(get.used.earthquakes()$Magnitude, xlab = "Magnitude", main = "Distribution of earthquake magnitudes")  
     })
     
-    # output$MagnitudeYearPlot <- renderPlot({
-    #   x <- magn.per.date()$mean
-    # ggplot(x, aes(Year, AvgMagnitude)) + 
-    #   geom_line(color = 'steelblue')+ theme_bw()+ 
-    #   ggtitle("Earthquake Magnitude")+
-    #   xlab('Date')+
-    #   ylab('Magnitude')+
-    #   theme(plot.title = element_text(hjust = 0.5))
-    # })
-    
     output$continentsMagnitudeDistribution <- renderPlot({
       ggplot(n.per.continent.per.magnitude(), aes(fill=Continent, y=n, x=DiscreteMagnitude)) + geom_bar(position = "stack", stat = "identity")
     })
-    # output$continentsMagnitudeDistribution <- renderPlot({
-    #   ggplot(n.per.continent.per.magnitude(), aes(fill=DiscreteMagnitude, y=n, x=Continent)) + geom_bar(position = "stack", stat = "identity")
-    # })
     
     output$mapRepresentation <- renderPlot({
       ggmap(map) +
