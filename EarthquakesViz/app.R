@@ -119,7 +119,6 @@ ui <- fluidPage(
                           mainPanel(
                             width = 12,
                             h1("Evolution of Earthquakes over time"),
-                            p("p creates a paragraph of text."),
                             plotOutput("tsFreqPlot"),
                             conditionalPanel(condition = 'input.seasonality && input.groupingUnit == "Month"', plotOutput('decompositionFrec')),
                             h1("Evolution of Average Magnitude over time"),
