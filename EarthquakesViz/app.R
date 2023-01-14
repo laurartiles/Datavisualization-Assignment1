@@ -124,9 +124,6 @@ ui <- fluidPage(
                             h1("Evolution of Average Magnitude over time"),
                             plotOutput("tsMagnitudePlot"),
                             conditionalPanel(condition = 'input.seasonality && input.groupingUnit == "Month"', plotOutput('decompositionAvg')),
-                            # plotOutput("MagnitudeYearPlot"),
-                            #plotOutput("mapRepresentation"),
-                            # h1("Analysis of Frequency"),
                             h2("Top 10"),
                             plotOutput("Top10QuakeFreq")
                             
