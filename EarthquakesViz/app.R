@@ -2,10 +2,6 @@
 # This is a Shiny web application. You can run the application by clicking
 # the 'Run App' button above.
 #
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 
 library(shiny) # Build interactive web apps
 library(tidyverse) # Collection of R packages for data science
@@ -19,6 +15,18 @@ library(rworldmap) # Mapping global data
 library(maps) # Display of maps
 library(ggmap) # Visualize spatial data from Stamen maps
 source("helper.R") # Map coordinates to continents
+
+library(leaflet)
+library(RColorBrewer)
+library(shinydashboard)
+library(lubridate)
+library(xts)
+library(DT)
+library(maptools)
+library(viridisLite)
+library(highcharter)
+library(treemap)
+
 
 earthquakes<-read.csv('database.csv')
 earthquakes$Date <- as.Date(earthquakes$Date, "%m/%d/%Y")
