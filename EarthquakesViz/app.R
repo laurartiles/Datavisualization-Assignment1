@@ -240,6 +240,16 @@ server <- function(input, output) {
       hist(get.used.earthquakes()$Magnitude, xlab = "Magnitude", main = "Distribution of earthquake magnitudes")  
     })
     
+    # output$MagnitudeYearPlot <- renderPlot({
+    #   x <- magn.per.date()$mean
+    # ggplot(x, aes(Year, AvgMagnitude)) + 
+    #   geom_line(color = 'steelblue')+ theme_bw()+ 
+    #   ggtitle("Earthquake Magnitude")+
+    #   xlab('Date')+
+    #   ylab('Magnitude')+
+    #   theme(plot.title = element_text(hjust = 0.5))
+    # })
+    
     output$continentsPiePlot <- renderPlot({
       pie(n.per.continent()$n, labels = n.per.continent()$Continent)
     })
@@ -247,6 +257,9 @@ server <- function(input, output) {
     output$continentsMagnitudeDistribution <- renderPlot({
       ggplot(n.per.continent.per.magnitude(), aes(fill=Continent, y=n, x=DiscreteMagnitude)) + geom_bar(position = "stack", stat = "identity")
     })
+    # output$continentsMagnitudeDistribution <- renderPlot({
+    #   ggplot(n.per.continent.per.magnitude(), aes(fill=DiscreteMagnitude, y=n, x=Continent)) + geom_bar(position = "stack", stat = "identity")
+    # })
     
     output$mapRepresentation <- renderPlot({
       ggmap(map) +
@@ -254,6 +267,143 @@ server <- function(input, output) {
         guides(fill=FALSE, alpha=FALSE)  +
         geom_sf(data = plates, colour = "red", fill = NA, inherit.aes = FALSE)
     })
+    
+    # Map with earthquakes by depth
+    qm <- function() {
+      # earthquake.get <- get.used.earthquakes()
+      pu <- paste("<b>Mag:</b>", as.character(get.used.earthquakes()$Magnitude), "<br>",
+                  "<b>Depth:</b>", as.character(get.used.earthquakes()$Depth), "km<br>",
+                  "<b>Time:</b>", as.character(get.used.earthquakes()$Date),"<br>",
+                  "<b>Lat:</b>", as.character(get.used.earthquakes()$Latitud),"<br>",
+                  "<b>Long:</b>", as.character(get.used.earthquakes()$Longitud),"<br>",
+                  "<b>ID:</b>", get.used.earthquakes()$ID,"<br>"
+      )
+      tempmap <- leaflet(get.used.earthquakes()) %>% addTiles() %>%
+        setView(0.000, 0.000, zoom = 2) %>%
+        addCircleMarkers(popup = pu,
+                         radius = ~ifelse(Magnitude < 5.9, 4, 6),
+                         color = ~pallet(Size),
+                         stroke = FALSE, fillOpacity = 0.6) #%>%
+      # addLegend("bottomleft", colors = c("black", "green",  "blue", "purple", "red", "yellow"),
+      # labels=c("3.3 to 3.9", ">3.9 to 4.9", ">4.9 to 5.9", ">5.9 to 6.9", ">6.9 to 7.9", ">7.9 to 9.1"),
+      # title = "Magnitude")
+    }
+    output$quakemap <- renderLeaflet(qm())
+    
+    # Map with grouped earthquakes in numbers
+    output$quakemap2 <- renderLeaflet(
+      leaflet(get.used.earthquakes()) %>%
+      addTiles() %>%
+      setView(0.000, 0.000, zoom = 2) %>%
+      addMarkers(lat=get.used.earthquakes()$Latitude, lng=get.used.earthquakes()$Longitude, clusterOptions = markerClusterOptions(),
+                 popup= paste("<b>Mag:</b>", as.character(get.used.earthquakes()$Magnitude), "<br>",
+                              "<b>Depth:</b>", as.character(get.used.earthquakes()$Depth), "km<br>",
+                              "<b>Time:</b>", as.character(get.used.earthquakes()$Date),"<br>",
+                              "<b>Lat:</b>", as.character(get.used.earthquakes()$Latitud),"<br>",
+                              "<b>Long:</b>", as.character(get.used.earthquakes()$Longitud),"<br>",
+                              "<b>ID:</b>", get.used.earthquakes()$ID,"<br>"
+    )))
+
+    # output$map <- renderLeaflet({
+    #   leaflet(get.used.earthquakes())%>%
+    #     addTiles() %>%
+    #     setView(0.000, 0.000, zoom = 2) %>%
+    #     addCircles(radius = 5, color = "red", fillOpacity = 0.7, popup=paste("Mag=", earthquakes$Magnitude))
+    # })
+
+    
+    # Map with earthquakes by depth
+    qd <- function() {
+      # earthquake.get <- get.used.earthquakes()
+      pu2 <- paste("<b>Mag:</b>", as.character(get.used.earthquakes()$Magnitude), "<br>",
+                  "<b>Depth:</b>", as.character(get.used.earthquakes()$Depth), "km<br>",
+                  "<b>Time:</b>", as.character(get.used.earthquakes()$Date),"<br>",
+                  "<b>Lat:</b>", as.character(get.used.earthquakes()$Latitud),"<br>",
+                  "<b>Long:</b>", as.character(get.used.earthquakes()$Longitud),"<br>",
+                  "<b>ID:</b>", get.used.earthquakes()$ID,"<br>"
+      )
+      tempmap <- leaflet(get.used.earthquakes()) %>% addTiles() %>%
+        setView(0.000, 0.000, zoom = 2) %>%
+        addCircleMarkers(popup = pu2,
+                         radius = 5,
+                         color = ~palletDepth(DepthType),
+                         stroke = FALSE, fillOpacity = 0.6) #%>%
+      # addLegend("bottomleft", colors = c("black", "green",  "blue", "purple", "red", "yellow"),
+      # labels=c("3.3 to 3.9", ">3.9 to 4.9", ">4.9 to 5.9", ">5.9 to 6.9", ">6.9 to 7.9", ">7.9 to 9.1"),
+      # title = "Magnitude")
+    }
+    output$quakemap_Depth <- renderLeaflet(qd())
+    
+    
+    #TreeMap Earthquakes Country
+    output$ChartCountry <- renderHighchart({
+      hchart(sum_country(),"treemap", hcaes(x = Country, value = Observations, color = "Observations"))%>%
+      hc_credits(enabled = TRUE, style = list(fontSize = "10px")) %>%
+      hc_title(text = "Earthquakes per Country")
+    })
+    
+    #Earthquakes per Year:
+    output$QuakesYear <- renderPlot({
+    ggplot(per_year(), aes(x=Year,y=Observations))+geom_bar(stat = "identity",fill="pink")+
+      labs(y="Observations", x="Year", title="Earthquakes per Year",
+           caption="Source: Significant Earthquakes, 1965-2016")+theme_bw()
+    })
+
+    output$QuakesYear2 <- renderPlot({
+    ggplot(per_year(), aes(x =Year, y =Observations, colour = "orange"))  + 
+      geom_point()  + geom_line()
+    })
+    
+    #Earthquakes per Magnitude:
+    output$QuakesMag <- renderPlot({
+      ggplot(per_magnitude(), aes(x=Magnitude,y=Observations))+geom_bar(stat = "identity",fill="purple")+
+        labs(y="Observations", x="Magnitude", title="Magnitude Analysis",
+             caption="Source: Significant Earthquakes, 1965-2016")+theme_bw()
+    })
+    
+    #Magnitude vs Depth
+    output$MagnitudeDepth <- renderPlot({
+    ggplot(get.used.earthquakes(), aes(Depth,Magnitude,color = Size))+
+      geom_jitter(alpha = 0.5)+
+      theme_bw()+ xlab('Magnitude')+ ylab('Depth')+ ggtitle('Magnitude Vs. Depth in Km')+ 
+        theme(plot.title = element_text(hjust = 0.5))
+
+      })
+    
+    # #Depth Analysis!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # output$QuakesDepth0 <- renderPlot({
+    # 
+    # #   ggplot(n.per.depth(), aes(x=Depth,y=n))+geom_bar(stat = "identity",fill="green")+
+    # #     labs(y="Observations", x="Depth", title="Depth Analysis",
+    # #          caption="Source: Significant Earthquakes, 1965-2016")+theme_bw()
+    # 
+    # ggplot(per_Depth(), aes(x =Depth, y=Observations,))+ geom_bar(stat = "identity",fill="red")+
+    #   labs(y="Observations", x="Depth", title="Depth Analysis",
+    #        caption="Source: Significant Earthquakes, 1965-2016")
+    # 
+    # })
+    
+    #Depth Analysis 
+    output$QuakesDepth <- renderPlot({
+      ggplot(get.used.earthquakes(),aes(Depth))+ xlim(0, 700) +
+        stat_density(fill="lightblue")+
+        labs(title="Earthquakes",subtitle="Depth")+
+        scale_x_log10(breaks = seq.int(from = 0,to = 700,by = 50))
+    })
+    
+    output$QuakesDepth2 <- renderPlot({
+      ggplot(per_Depth(), aes(x =Depth, y =Observations, colour = "red"))  + 
+        geom_point()  + geom_line()
+    })
+    
+
+    #Top 10 Years with Highest Earthquake Frequency in selected Range of Dates
+    output$Top10QuakeFreq <- renderPlot({
+      ggplot(Quake_Freq(), aes(x =reorder(Year,n), y =  n )) + geom_bar(stat='identity',colour="white", fill = c("#66a3da")) +
+        labs(x = 'Year', y = 'Count', title = 'Top 10 Years with Highest Earthquake Frequency in selected Range of Dates') +
+        coord_flip() + theme_bw()
+    })
+
     
 }
 
