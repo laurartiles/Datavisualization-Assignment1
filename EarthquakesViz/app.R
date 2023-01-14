@@ -127,10 +127,7 @@ ui <- fluidPage(
                             conditionalPanel(condition = 'input.seasonality && input.groupingUnit == "Month"', plotOutput('decompositionAvg')),
                             # plotOutput("MagnitudeYearPlot"),
                             #plotOutput("mapRepresentation"),
-                            h1("Analysis of Frequency"),
-                            h2("Histograms"),
-                            plotOutput("QuakesYear"),
-                            plotOutput("QuakesYear2"),
+                            # h1("Analysis of Frequency"),
                             h2("Top 10"),
                             plotOutput("Top10QuakeFreq")
                             
@@ -374,19 +371,7 @@ server <- function(input, output) {
       hc_credits(enabled = TRUE, style = list(fontSize = "10px")) %>%
       hc_title(text = "Earthquakes per Country")
     })
-    
-    #Earthquakes per Year:
-    output$QuakesYear <- renderPlot({
-    ggplot(per_year(), aes(x=Year,y=Observations))+geom_bar(stat = "identity",fill="pink")+
-      labs(y="Observations", x="Year", title="Earthquakes per Year",
-           caption="Source: Significant Earthquakes, 1965-2016")+theme_bw()
-    })
 
-    output$QuakesYear2 <- renderPlot({
-    ggplot(per_year(), aes(x =Year, y =Observations, colour = "orange"))  + 
-      geom_point()  + geom_line()
-    })
-    
     #Earthquakes per Magnitude:
     output$QuakesMag <- renderPlot({
       ggplot(per_magnitude(), aes(x=Magnitude,y=Observations))+geom_bar(stat = "identity",fill="purple")+
