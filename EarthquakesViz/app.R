@@ -198,35 +198,19 @@ server <- function(input, output) {
       get.used.earthquakes() %>% group_by(date = format(Date, get.date.format())) %>% summarise(min = min(Magnitude), mean = mean(Magnitude), max = max(Magnitude)) %>% na.omit
     })
     
-    
-    # Frequency (per continent)
-    n.per.continent <- reactive({
-      get.used.earthquakes() %>% count(Continent)
-    })
-    # Frequency (per continent and magnitude)
-    n.per.continent.per.magnitude <- reactive({
-      get.used.earthquakes() %>% count(Continent, DiscreteMagnitude)
-    })
-    n.per.depth <- reactive({
-      get.used.earthquakes() %>% count(Depth)
+    mapPointPopup <- reactive({
+      paste("<b>Mag:</b>", as.character(get.used.earthquakes()$Magnitude), "<br>",
+            "<b>Depth:</b>", as.character(get.used.earthquakes()$Depth), "km<br>",
+            "<b>Time:</b>", as.character(get.used.earthquakes()$Date),"<br>",
+            "<b>Lat:</b>", as.character(get.used.earthquakes()$Latitud),"<br>",
+            "<b>Long:</b>", as.character(get.used.earthquakes()$Longitud),"<br>",
+            "<b>ID:</b>", get.used.earthquakes()$ID,"<br>")
     })
     
-    per_year <- reactive({
-      get.used.earthquakes() %>% filter(Type=="Earthquake") %>% 
-        group_by(Year) %>% summarise(Observations=n())
-    })
-    per_magnitude <- reactive({
-      get.used.earthquakes() %>% filter(Type=="Earthquake") %>% 
-        group_by(Magnitude) %>% summarise(Observations=n())
-    })
-    per_Depth <- reactive({
-      get.used.earthquakes() %>% filter(Type=="Earthquake") %>% group_by(Depth) %>% summarise(Observations=n())
-    })
-    sum_country <- reactive({
-      get.used.earthquakes() %>% group_by(Country) %>% summarise(Observations=n())
-    })
     
-    # PLOTS
+    ### PLOTS ###############################################################
+    
+    ### EVOLUTION PLOTS ###
     output$tsFreqPlot <- renderPlot({
       x <- n.per.date()
       ts.earthquakes <- ts(x$n, start = ts.start(), end = ts.end(), frequency = get.used.frec())
@@ -260,19 +244,18 @@ server <- function(input, output) {
       plot(ts.dec)
     })
     
-    output$continentsMagnitudeDistribution <- renderPlot({
-      ggplot(n.per.continent.per.magnitude(), aes(fill=Continent, y=n, x=DiscreteMagnitude)) + geom_bar(position = "stack", stat = "identity")
+    #Top 10 Dates with Highest Earthquake Frequency in selected Range of Dates
+    output$Top10QuakeFreq <- renderPlot({
+      ggplot(top.frequencies(), aes(x=reorder(date,n), y=n)) + 
+        geom_bar(stat='identity',colour="white", fill = c("#66a3da")) +
+        labs(x = 'Date', y = 'Count', title = paste('Top 10 ', input$groupingUnit, 's with Highest Earthquake Frequency in selected Range of Dates', sep = '')) +
+        coord_flip() + 
+        theme_bw()
     })
+    ### END EVOLUTION PLOTS ###
     
-    mapPointPopup <- reactive({
-      paste("<b>Mag:</b>", as.character(get.used.earthquakes()$Magnitude), "<br>",
-            "<b>Depth:</b>", as.character(get.used.earthquakes()$Depth), "km<br>",
-            "<b>Time:</b>", as.character(get.used.earthquakes()$Date),"<br>",
-            "<b>Lat:</b>", as.character(get.used.earthquakes()$Latitud),"<br>",
-            "<b>Long:</b>", as.character(get.used.earthquakes()$Longitud),"<br>",
-            "<b>ID:</b>", get.used.earthquakes()$ID,"<br>")
-    })
     
+    ### LOCATION PLOTS #############################################
     # Map with earthquakes by depth
     output$quakemap <- renderLeaflet({
       leaflet(get.used.earthquakes()) %>% 
@@ -287,6 +270,38 @@ server <- function(input, output) {
         leaflet::addLegend("bottomleft", pal = pallet, values=~Size, title = "Magnitude")
     })
     
+    #TreeMap Earthquakes Country
+    output$ChartCountry <- renderHighchart({
+      hchart(get.used.earthquakes() %>% count(Country),"treemap", hcaes(x = Country, value = n, color = "n"))%>%
+        hc_credits(enabled = TRUE, style = list(fontSize = "10px")) %>%
+        hc_title(text = "Earthquakes per Country")
+    })
+    ### END LOCATION PLOTS #########################################
+    
+    
+    ### MAGNITUDE PLOTS ############################################
+    output$continentsMagnitudeDistribution <- renderPlot({
+      ggplot(get.used.earthquakes() %>% count(Continent, DiscreteMagnitude), aes(fill=Continent, y=n, x=DiscreteMagnitude)) + geom_bar(position = "stack", stat = "identity")
+    })
+    
+    #Earthquakes per Magnitude:
+    output$QuakesMag <- renderPlot({
+      ggplot(get.used.earthquakes(), aes(x=Magnitude))+geom_histogram(fill="purple", bins = 10)+
+        labs(y="Observations", x="Magnitude", title="Magnitude Analysis")+theme_bw()
+    })
+    
+    #Magnitude vs Depth
+    output$MagnitudeDepth <- renderPlot({
+      ggplot(get.used.earthquakes(), aes(Depth,Magnitude,color = Size))+
+        geom_jitter(alpha = 0.5)+
+        theme_bw()+ xlab('Depth')+ ylab('Magnitude')+ ggtitle('Magnitude Vs. Depth in Km')+ 
+        theme(plot.title = element_text(hjust = 0.5))
+      
+    })
+    ### END MAGNITUDE PLOTS ###########################################
+    
+    
+    ### DEPTH PLOTS ########################################
     # Map with earthquakes by depth
     output$quakemap_Depth <- renderLeaflet({
       leaflet(get.used.earthquakes()) %>% addTiles() %>%
@@ -299,31 +314,6 @@ server <- function(input, output) {
         leaflet::addLegend("bottomleft", pal = palletDepth, values=~DepthType, title = "Depth")
     })
     
-    
-    #TreeMap Earthquakes Country
-    output$ChartCountry <- renderHighchart({
-      hchart(sum_country(),"treemap", hcaes(x = Country, value = Observations, color = "Observations"))%>%
-      hc_credits(enabled = TRUE, style = list(fontSize = "10px")) %>%
-      hc_title(text = "Earthquakes per Country")
-    })
-
-    #Earthquakes per Magnitude:
-    output$QuakesMag <- renderPlot({
-      ggplot(per_magnitude(), aes(x=Magnitude,y=Observations))+geom_bar(stat = "identity",fill="purple")+
-        labs(y="Observations", x="Magnitude", title="Magnitude Analysis",
-             caption="Source: Significant Earthquakes, 1965-2016")+theme_bw()
-    })
-    
-    #Magnitude vs Depth
-    output$MagnitudeDepth <- renderPlot({
-    ggplot(get.used.earthquakes(), aes(Depth,Magnitude,color = Size))+
-      geom_jitter(alpha = 0.5)+
-      theme_bw()+ xlab('Magnitude')+ ylab('Depth')+ ggtitle('Magnitude Vs. Depth in Km')+ 
-        theme(plot.title = element_text(hjust = 0.5))
-
-      })
-    
-    
     #Depth Analysis 
     output$QuakesDepth <- renderPlot({
       ggplot(get.used.earthquakes(),aes(Depth))+ xlim(0, 700) +
@@ -331,18 +321,7 @@ server <- function(input, output) {
         labs(title="Earthquakes",subtitle="Depth")+
         scale_x_log10(breaks = seq.int(from = 0,to = 700,by = 50))
     })
-    
-
-    #Top 10 Dates with Highest Earthquake Frequency in selected Range of Dates
-    output$Top10QuakeFreq <- renderPlot({
-      ggplot(top.frequencies(), aes(x=reorder(date,n), y=n)) + 
-        geom_bar(stat='identity',colour="white", fill = c("#66a3da")) +
-        labs(x = 'Date', y = 'Count', title = paste('Top 10 ', input$groupingUnit, 's with Highest Earthquake Frequency in selected Range of Dates', sep = '')) +
-        coord_flip() + 
-        theme_bw()
-    })
-
-    
+    ### END DEPTH PLOTS ####################################
 }
 
 # Run the application 
