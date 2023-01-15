@@ -319,7 +319,7 @@ server <- function(input, output) {
       ggplot(get.used.earthquakes(),aes(Depth))+ xlim(0, 700) +
         stat_density(fill="lightblue")+
         labs(title="Earthquakes",subtitle="Depth")+
-        scale_x_log10(breaks = seq.int(from = 0,to = 700,by = 50))
+        theme_bw()
     })
     ### END DEPTH PLOTS ####################################
 }
