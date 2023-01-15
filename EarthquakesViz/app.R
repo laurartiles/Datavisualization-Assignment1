@@ -85,7 +85,7 @@ ui <- fluidPage(
                        choices = CONTINENTS,
                        selected = CONTINENTS),
     checkboxInput("seasonality",
-                  "Visualize seasonality",
+                  "Visualize seasonality (advanced)",
                   value = FALSE),
     checkboxInput("groupPoints",
                   "Group points in location map",
