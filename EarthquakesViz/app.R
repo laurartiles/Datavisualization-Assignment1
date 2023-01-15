@@ -202,7 +202,7 @@ server <- function(input, output) {
     output$tsFreqPlot <- renderPlot({
       x <- n.per.date()
       ts.earthquakes <- ts(x$n, start = ts.start(), end = ts.end(), frequency = get.used.frec())
-      plot.ts(ts.earthquakes, ylab = "Frequency")
+      plot.ts(ts.earthquakes, xlab = "Date", ylab = "Frequency")
     })
     
     output$decompositionFrec <- renderPlot({
@@ -213,17 +213,18 @@ server <- function(input, output) {
     })
     
     output$tsMagnitudePlot <- renderPlot({
-      ts.min <- ts(magn.per.date()$min, start = ts.start(), end = ts.end(), frequency = get.used.frec())
-      ts.mean <- ts(magn.per.date()$mean, start = ts.start(), end = ts.end(), frequency = get.used.frec())
-      ts.max <- ts(magn.per.date()$max, start = ts.start(), end = ts.end(), frequency = get.used.frec())
-      ts.plot(ts.min, ts.mean, ts.max, ylab = "Magnitude")
+      #ts.min <- ts(magn.per.date()$min, start = ts.start(), end = ts.end(), frequency = get.used.frec())
+      #ts.mean <- ts(magn.per.date()$mean, start = ts.start(), end = ts.end(), frequency = get.used.frec())
+      #ts.max <- ts(magn.per.date()$max, start = ts.start(), end = ts.end(), frequency = get.used.frec())
+      #ts.plot(ts.min, ts.mean, ts.max, ylab = "Magnitude")
       
-      #df <- magn.per.date()
-      #ggplot(df, aes(1:nrow(df), mean)) + 
-      #  geom_line() +
-      #  geom_ribbon(aes(1:nrow(df), ymax=max, ymin=min), alpha=0.1) +
-      #  theme_bw() +
-      #  labs(x = "Date", y = "Min, Mean and Max magnitude")
+      df <- magn.per.date()
+      df$date <- as.Date(paste(df$date, ifelse(get.date.format()=='Month', '01', '01-01'), sep='-'))
+      ggplot(df, aes(x=date, y=mean)) + 
+        geom_line() +
+        geom_ribbon(aes(x=date, ymax=max, ymin=min), alpha=0.1) +
+        theme_bw() +
+        labs(x = "Date", y = "Magnitude")
     })
     
     output$decompositionAvg <- renderPlot({
@@ -268,19 +269,23 @@ server <- function(input, output) {
     
     ### MAGNITUDE PLOTS ############################################
     output$continentsMagnitudeDistribution <- renderPlot({
-      ggplot(get.used.earthquakes() %>% count(Continent, DiscreteMagnitude), aes(fill=Continent, y=n, x=DiscreteMagnitude)) + geom_bar(position = "stack", stat = "identity")
+      ggplot(get.used.earthquakes() %>% count(Continent, DiscreteMagnitude), 
+        aes(fill=Continent, y=n, x=DiscreteMagnitude)) + 
+        geom_bar(position = "stack", stat = "identity") +
+        labs(x = 'Magnitude', y = 'Frequency') +
+        theme_bw()
     })
     
     #Earthquakes per Magnitude:
     output$QuakesMag <- renderPlot({
       ggplot(get.used.earthquakes(), aes(x=Magnitude))+geom_histogram(fill="purple", bins = 10)+
-        labs(y="Observations", x="Magnitude")+theme_bw()
+        labs(x="Magnitude", y="Frequency")+theme_bw()
     })
     
     #Magnitude vs Depth
     output$MagnitudeDepth <- renderPlot({
       ggplot(get.used.earthquakes(), aes(Depth,Magnitude,color = Size))+
-        geom_jitter(alpha = 0.5)+
+        geom_point()+
         theme_bw()+ xlab('Depth')+ ylab('Magnitude')+ 
         theme(plot.title = element_text(hjust = 0.5))
       
@@ -305,7 +310,7 @@ server <- function(input, output) {
     output$QuakesDepth <- renderPlot({
       ggplot(get.used.earthquakes(),aes(Depth))+ xlim(0, 700) +
         stat_density(fill="lightblue")+
-        labs(title="Earthquakes",subtitle="Depth")+
+        labs(y="Density")+
         theme_bw()
     })
     ### END DEPTH PLOTS ####################################
