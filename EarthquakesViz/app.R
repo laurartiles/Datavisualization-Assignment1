@@ -30,18 +30,11 @@ library(treemap)
 
 earthquakes<-read.csv('database.csv')
 earthquakes$Date <- as.Date(earthquakes$Date, "%m/%d/%Y")
-earthquakes$Year <- format(earthquakes$Date, "%Y")
-earthquakes$Month <- format(earthquakes$Date, "%m")
-earthquakes$Day <- format(earthquakes$Date, "%d")
 
 min_date <- min(earthquakes$Date, na.rm = TRUE)
 max_date <- max(earthquakes$Date, na.rm = TRUE)
 min_magnitude <-  min(earthquakes$Magnitude, na.rm = TRUE)
 max_magnitude <- max(earthquakes$Magnitude, na.rm = TRUE)
-min_long <-  min(earthquakes$Longitude, na.rm = TRUE)
-max_long <- max(earthquakes$Longitude, na.rm = TRUE)
-min_lat <-  min(earthquakes$Latitude, na.rm = TRUE)
-max_lat <- max(earthquakes$Latitude, na.rm = TRUE)
 
 coords.df <- data.frame(Lng=earthquakes$Longitude, Lat=earthquakes$Latitude)
 #https://github.com/fraxen/tectonicplates/edit/master/GeoJSON/PB2002_plates.json
@@ -95,7 +88,7 @@ ui <- fluidPage(
                   "Visualize seasonality",
                   value = FALSE),
     checkboxInput("groupPoints",
-                  "Group points in location maps",
+                  "Group points in location map",
                   value = FALSE)
   ),
   mainPanel(
@@ -188,9 +181,6 @@ server <- function(input, output) {
     n.per.date <- reactive({
       get.used.earthquakes() %>% count(date = format(Date, get.date.format())) %>% na.omit
     })
-    top.frequencies <- reactive({
-      n.per.date() %>% arrange(desc(n)) %>% head(10)
-    })
     # Magnitude (per date)
     magn.per.date <- reactive({
       get.used.earthquakes() %>% group_by(date = format(Date, get.date.format())) %>% summarise(min = min(Magnitude), mean = mean(Magnitude), max = max(Magnitude)) %>% na.omit
@@ -244,7 +234,7 @@ server <- function(input, output) {
     
     #Top 10 Dates with Highest Earthquake Frequency in selected Range of Dates
     output$Top10QuakeFreq <- renderPlot({
-      ggplot(top.frequencies(), aes(x=reorder(date,n), y=n)) + 
+      ggplot(n.per.date() %>% arrange(desc(n)) %>% head(10), aes(x=reorder(date,n), y=n)) + 
         geom_bar(stat='identity',colour="white", fill = c("#66a3da")) +
         labs(x = 'Date', y = 'Count') +
         coord_flip() + 
