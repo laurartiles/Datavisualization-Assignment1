@@ -53,21 +53,16 @@ earthquakes$Country <- as.factor(coords2continent(coords.df, 'country'))
 
 earthquakes$DiscreteMagnitude <- floor(earthquakes$Magnitude)
 
-earthquakes$Size <- cut(earthquakes$Magnitude,
-                        c(5.4, 5.9, 6.9, 7.9, 9.1),
-                        labels=c("5.5 to 5.9", "6.0 to 6.9", "7.0 to 7.9", "8.0 to 9.1"))
-
+SizeLabels <- c("5.5 to 5.9", "6.0 to 6.9", "7.0 to 7.9", "8.0 to 9.1")
+earthquakes$Size <- cut(earthquakes$Magnitude, c(5.4, 5.9, 6.9, 7.9, 9.1), labels=SizeLabels)
 # colour pallet Magnitude
-pallet <- colorFactor(c("green", "yellow", "orange", "red"),
-                      domain = c("5.5 to 5.9", "6.0 to 6.9", "7.0 to 7.9", "8.0 to 9.1"))
+pallet <- colorFactor(c("green", "yellow", "orange", "red"), domain = SizeLabels, ordered = TRUE)
+
+DepthLabels <- c("<50km", "<100km", ">100km")
+earthquakes$DepthType <- cut(earthquakes$Depth, c(-1.1, 50, 100, 700), labels=DepthLabels)
+palletDepth <- colorFactor(c("red",  "yellow", "green"), domain=DepthLabels, ordered = TRUE)
 
 
-earthquakes$DepthType <- cut(earthquakes$Depth,
-                        c(-1.1, 99, 200, 700),
-                        labels=c("<50km", "<100km", ">100km"))
-
-palletDepth <- colorFactor(c("yellow",  "orange", "red"),
-                          domain = c("<50km", "<100km", ">100km"))
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
