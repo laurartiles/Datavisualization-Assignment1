@@ -44,8 +44,6 @@ min_lat <-  min(earthquakes$Latitude, na.rm = TRUE)
 max_lat <- max(earthquakes$Latitude, na.rm = TRUE)
 
 coords.df <- data.frame(Lng=earthquakes$Longitude, Lat=earthquakes$Latitude)
-map.bbox <- c(bottom=-85, top=85, right=185, left=-185)
-map <- get_stamenmap(bbox = map.bbox, zoom=3, maptype='watercolor')
 #https://github.com/fraxen/tectonicplates/edit/master/GeoJSON/PB2002_plates.json
 plates <- fortify(st_read("plates.json"))
 
