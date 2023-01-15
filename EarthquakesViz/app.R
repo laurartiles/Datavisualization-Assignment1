@@ -266,7 +266,7 @@ server <- function(input, output) {
         addPolygons(data = plates) %>%
         setView(0.000, 0.000, zoom = 2) %>%
         addCircleMarkers(popup = mapPointPopup(),
-                         radius = ~ifelse(Magnitude < 5.9, 4, 6),
+                         radius = ~ifelse(Magnitude < 5.9, 2, 4),
                          color = ~pallet(Size),
                          stroke = FALSE, fillOpacity = 0.6,
                          clusterOptions = {if (input$groupPoints) markerClusterOptions()}) %>%
@@ -310,7 +310,7 @@ server <- function(input, output) {
         addPolygons(data = plates) %>%
         setView(0.000, 0.000, zoom = 2) %>%
         addCircleMarkers(popup = mapPointPopup(),
-                         radius = 5,
+                         radius = 2,
                          color = ~palletDepth(DepthType),
                          stroke = FALSE, fillOpacity = 0.6) %>%
         leaflet::addLegend("bottomleft", pal = palletDepth, values=~DepthType, title = "Depth")
