@@ -121,13 +121,13 @@ ui <- fluidPage(
                tabPanel("Evolution of earthquakes",
                           mainPanel(
                             width = 12,
-                            h1("Evolution of Earthquakes over time"),
+                            h2("Number of earthquakes per time period"),
                             plotOutput("tsFreqPlot"),
                             conditionalPanel(condition = 'input.seasonality && input.groupingUnit == "Month"', plotOutput('decompositionFrec')),
-                            h1("Evolution of Average Magnitude over time"),
+                            h2("Min, mean and max magnitude of earthquakes per time period"),
                             plotOutput("tsMagnitudePlot"),
                             conditionalPanel(condition = 'input.seasonality && input.groupingUnit == "Month"', plotOutput('decompositionAvg')),
-                            h2("Top 10"),
+                            h2('Top 10 time periods with Highest Earthquake Frequency'),
                             plotOutput("Top10QuakeFreq")
                             
                           )
@@ -135,25 +135,30 @@ ui <- fluidPage(
                tabPanel("Location of earthquakes",
                           mainPanel(
                             width = 12,
-                            h1("Map of Earthquakes by magnitude"),
+                            h2("Map of Earthquakes by magnitude"),
                             leafletOutput("quakemap"),
-                            h1("Treemap - Earthquakes per Country"),
+                            h2("Earthquakes per Country"),
                             highchartOutput("ChartCountry")
                           )
                ),
                tabPanel("Magnitude Analysis",
                           mainPanel(
                             width = 12,
+                            h2('Number of earthquakes per continent and magnitude range'),
                             plotOutput("continentsMagnitudeDistribution"),
+                            h2('Total number of earthquakes per magnitude range'),
                             plotOutput("QuakesMag"),
-                            plotOutput("MagnitudeDepth"),
+                            h2('Magnitude Vs. Depth in Km'),
+                            plotOutput("MagnitudeDepth")
                           )
                 ),
                tabPanel("Depth Analysis",
                         mainPanel(
                           width = 12,
-                          plotOutput("QuakesDepth"),
-                          leafletOutput("quakemap_Depth")
+                          h2('Map of Earthquakes by depth'),
+                          leafletOutput("quakemap_Depth"),
+                          h2('Distribution of Earthquakes per depth'),
+                          plotOutput("QuakesDepth")
                         )
                )
               )
@@ -214,7 +219,7 @@ server <- function(input, output) {
     output$tsFreqPlot <- renderPlot({
       x <- n.per.date()
       ts.earthquakes <- ts(x$n, start = ts.start(), end = ts.end(), frequency = get.used.frec())
-      plot.ts(ts.earthquakes, main = paste("Number of earthquakes per ", input$groupingUnit))
+      plot.ts(ts.earthquakes, ylab = "Frequency")
     })
     
     output$decompositionFrec <- renderPlot({
@@ -228,7 +233,7 @@ server <- function(input, output) {
       ts.min <- ts(magn.per.date()$min, start = ts.start(), end = ts.end(), frequency = get.used.frec())
       ts.mean <- ts(magn.per.date()$mean, start = ts.start(), end = ts.end(), frequency = get.used.frec())
       ts.max <- ts(magn.per.date()$max, start = ts.start(), end = ts.end(), frequency = get.used.frec())
-      ts.plot(ts.min, ts.mean, ts.max, main = paste("Min, mean and max magnitude of earthquakes per ", input$groupingUnit))
+      ts.plot(ts.min, ts.mean, ts.max, ylab = "Magnitude")
       
       #df <- magn.per.date()
       #ggplot(df, aes(1:nrow(df), mean)) + 
@@ -248,7 +253,7 @@ server <- function(input, output) {
     output$Top10QuakeFreq <- renderPlot({
       ggplot(top.frequencies(), aes(x=reorder(date,n), y=n)) + 
         geom_bar(stat='identity',colour="white", fill = c("#66a3da")) +
-        labs(x = 'Date', y = 'Count', title = paste('Top 10 ', input$groupingUnit, 's with Highest Earthquake Frequency in selected Range of Dates', sep = '')) +
+        labs(x = 'Date', y = 'Count') +
         coord_flip() + 
         theme_bw()
     })
@@ -273,8 +278,7 @@ server <- function(input, output) {
     #TreeMap Earthquakes Country
     output$ChartCountry <- renderHighchart({
       hchart(get.used.earthquakes() %>% count(Country),"treemap", hcaes(x = Country, value = n, color = "n"))%>%
-        hc_credits(enabled = TRUE, style = list(fontSize = "10px")) %>%
-        hc_title(text = "Earthquakes per Country")
+        hc_credits(enabled = TRUE, style = list(fontSize = "10px"))
     })
     ### END LOCATION PLOTS #########################################
     
@@ -287,14 +291,14 @@ server <- function(input, output) {
     #Earthquakes per Magnitude:
     output$QuakesMag <- renderPlot({
       ggplot(get.used.earthquakes(), aes(x=Magnitude))+geom_histogram(fill="purple", bins = 10)+
-        labs(y="Observations", x="Magnitude", title="Magnitude Analysis")+theme_bw()
+        labs(y="Observations", x="Magnitude")+theme_bw()
     })
     
     #Magnitude vs Depth
     output$MagnitudeDepth <- renderPlot({
       ggplot(get.used.earthquakes(), aes(Depth,Magnitude,color = Size))+
         geom_jitter(alpha = 0.5)+
-        theme_bw()+ xlab('Depth')+ ylab('Magnitude')+ ggtitle('Magnitude Vs. Depth in Km')+ 
+        theme_bw()+ xlab('Depth')+ ylab('Magnitude')+ 
         theme(plot.title = element_text(hjust = 0.5))
       
     })
