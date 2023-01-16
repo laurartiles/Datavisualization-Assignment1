@@ -3,29 +3,23 @@
 # the 'Run App' button above.
 #
 
-library(shiny) # Build interactive web apps
-library(tidyverse) # Collection of R packages for data science
-library(ggplot2) # Data visualization package
-library(dplyr) # Tools for easier df manipulation (e.g. pipes)
-library(plotly) # Interactive plots
-library(forcats) # Categorical values handling
-library(sp) # Spatial data
-library(sf) # Spatial data
-library(rworldmap) # Mapping global data
-library(maps) # Display of maps
-library(ggmap) # Visualize spatial data from Stamen maps
-source("helper.R") # Map coordinates to continents
-
-library(leaflet)
-library(RColorBrewer)
-library(shinydashboard)
-library(lubridate)
-library(xts)
-library(DT)
-library(maptools)
-library(viridisLite)
-library(highcharter)
+library(dplyr) 
+library(forcats) 
+library(ggplot2) 
+library(highcharter) 
+library(leaflet) 
+library(maps) 
+library(ggmap) 
+library(RColorBrewer) 
+library(rworldmap) 
+library(sf) 
+library(shiny) 
+library(shinydashboard) 
+library(sp) 
+library(tidyverse) 
 library(treemap)
+
+source("helper.R") # Map coordinates to continents
 
 
 earthquakes<-read.csv('database.csv')
